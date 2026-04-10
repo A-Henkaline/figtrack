@@ -1,0 +1,12 @@
+# dependencies
+node_modules/
+
+# environment variables (may contain secrets)
+.env.local
+.env.*.local
+
+# production build
+build/
+
+# misc
+.DS_Store

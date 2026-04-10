@@ -94,17 +94,32 @@ The person asks: "${aiQuestion}"
 Give a helpful, specific, practical answer in 2-4 sentences. Be conversational, not clinical.`
 
     try {
+      const apiKey = process.env.REACT_APP_ANTHROPIC_API_KEY
+      if (!apiKey) {
+        setAiAnswer('AI is not configured. Set REACT_APP_ANTHROPIC_API_KEY in your .env.local file.')
+        setAiLoading(false)
+        return
+      }
       const res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true',
+        },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
+          model: 'claude-sonnet-4-5',
           max_tokens: 1000,
           messages: [{ role: 'user', content: prompt }],
         }),
       })
       const json = await res.json()
-      setAiAnswer(json.content?.[0]?.text || 'Sorry, I couldn\'t get a response. Try again.')
+      if (!res.ok) {
+        setAiAnswer(`Error: ${json.error?.message || 'Unable to get a response. Try again.'}`)
+      } else {
+        setAiAnswer(json.content?.[0]?.text || 'Sorry, I couldn\'t get a response. Try again.')
+      }
     } catch {
       setAiAnswer('Network error — check your connection and try again.')
     }
